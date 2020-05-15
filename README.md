@@ -16,6 +16,8 @@ regular number is augmented with an extra term corresponding to it's derivative:
 Arithmetic and other mathematical functions then have translations to operating
 on these extended number types as follows:
 
+|Operator|Translated|
+|--------|----------|
 |<x, x'> + <y, y'>|<x + y, x' + y'>
 |<x, x'> - <y, y'>|<x - y, x' - y'>
 |<x, x'> \* <y, y'>|<x\*y, y'\*x - y*x'>
