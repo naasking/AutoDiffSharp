@@ -22,7 +22,7 @@ Arithmetic and other mathematical functions then have translations to operating 
 
 See the wikipedia page for more transformations, like standard trig functions.
 
-# Core
+# Dual Numbers from Operator Overloading
 
 Invoking a function "f" with dual numbers operates like this, in math notation:
 
