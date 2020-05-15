@@ -50,7 +50,9 @@ Internally, differentiation invokes the function like this:
 
     public static Number DifferentiateAt(
         double x0, double x1, double x2, Func<Number, Number, Number, Number> func) =>
-        func(new Number(x0, 1, 0, 0), new Number(x1, 0, 0, 1), new Number(x2, 0, 0, 1));
+        func(new Number(x0, 1, 0, 0),
+             new Number(x1, 0, 1, 0),
+             new Number(x2, 0, 0, 1));
 
 As you can see, each parameter has a 1 in the derivative slot corresponding to
 its position in the argument list, and zeroes everywhere else.
