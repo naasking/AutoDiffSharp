@@ -21,7 +21,7 @@ on these extended number types as follows:
 |<x, x'> + <y, y'>|<x + y, x' + y'>
 |<x, x'> - <y, y'>|<x - y, x' - y'>
 |<x, x'> \* <y, y'>|<x\*y, y'\*x - y*x'>
-|<x, x'> / <y, y'>|<x / y, (x'\*y - x\*y')/y^2>
+|<x, x'> / <y, y'>|<x / y, (x'\*y - x\*y')/y<sup>2</sup>>
 |<x, x'><sup>k</sup>|<x<sup>k</sup>, k\*x<sup>(k-1)</sup>\*x'>
 
 See the wikipedia page for more transformations, like standard trig functions.
