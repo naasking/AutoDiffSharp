@@ -28,7 +28,7 @@ Invoking a function "f" with dual numbers operates like this, in math notation:
 
 > f(x0 + ϵ<sub>x1</sub>, x1 + ϵ<sub>x2</sub>, x2 + ϵ<sub>x2</sub>)
 
-So each parameter gets its own extra parameter corresponding to the derivative, distinct from all others. However, as you can see in the translation table, these derivative parameters interact with one another in some operators, so each function parameter has to carry a vector corresponding to the coefficients of all other parameters. Here's the basic number type:
+So each parameter carries along an extra value corresponding to the derivative, and this extra value is distinct from the values of all other parameters. However, as you can see in the translation table, these derivative values interact with one another in some operators, so each function parameter has to carry a vector corresponding to the coefficients of all other parameters. Here's the basic number type:
 
     public readonly struct Number
     {
