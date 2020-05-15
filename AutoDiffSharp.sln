@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30104.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDiffSharp", "AutoDiffSharp\AutoDiffSharp.csproj", "{93ADE751-160E-402E-A9A5-EA10B1189401}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDiffSharp.Tests", "AutoDiffSharp.Tests\AutoDiffSharp.Tests.csproj", "{1BE28435-7FFF-4587-BAAD-147B3C28CDC0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{93ADE751-160E-402E-A9A5-EA10B1189401}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93ADE751-160E-402E-A9A5-EA10B1189401}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93ADE751-160E-402E-A9A5-EA10B1189401}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93ADE751-160E-402E-A9A5-EA10B1189401}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BE28435-7FFF-4587-BAAD-147B3C28CDC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BE28435-7FFF-4587-BAAD-147B3C28CDC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BE28435-7FFF-4587-BAAD-147B3C28CDC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BE28435-7FFF-4587-BAAD-147B3C28CDC0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {26091B41-1155-4798-AD30-4AB3F0BFC08C}
+	EndGlobalSection
+EndGlobal
