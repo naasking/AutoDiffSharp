@@ -30,7 +30,7 @@ See the wikipedia page for more transformations, like standard trig functions.
 
 Invoking a function "f" with dual numbers operates like this, in math notation:
 
-`f(x0 + ϵ<sub>x1</sub>, x1 + ϵ<sub>x2</sub>, x2 + ϵ<sub>x2</sub>)`
+> f(x0 + ϵ<sub>x1</sub>, x1 + ϵ<sub>x2</sub>, x2 + ϵ<sub>x2</sub>)
 
 So each parameter gets its own differentiable extra parameter, distinct from all
 others. However, as you can see in the translation table, these all interact with
