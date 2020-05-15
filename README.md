@@ -1,20 +1,16 @@
 # AutoDiffSharp
 
-Simple automatic differentiation (AD) in C# that uses operator overloading
-to implement dual numbers.
+Simple automatic differentiation (AD) in C# that uses operator overloading to implement dual numbers.
 
-This isn't a super efficient implementation, but it's probably fine for
-small functions and tests, and for learning how AD works.
+This isn't a super efficient implementation, but it's probably fine for small functions and tests, and for learning how AD works.
 
 # Dual Numbers
 
-The most straightforward implemenation of AD is based on [dual numbers](https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_numbers). Each
-regular number is augmented with an extra term corresponding to it's derivative:
+The most straightforward implemenation of AD is based on [dual numbers](https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_numbers). Each regular number is augmented with an extra term corresponding to it's derivative:
 
     real number x   =(dual number)=>   x + x'*ϵ
 
-Arithmetic and other mathematical functions then have translations to operating
-on these extended number types as follows:
+Arithmetic and other mathematical functions then have translations to operating on these extended number types as follows:
 
 |Operator|Translated|
 |--------|----------|
@@ -32,10 +28,7 @@ Invoking a function "f" with dual numbers operates like this, in math notation:
 
 > f(x0 + ϵ<sub>x1</sub>, x1 + ϵ<sub>x2</sub>, x2 + ϵ<sub>x2</sub>)
 
-So each parameter gets its own differentiable extra parameter, distinct from all
-others. However, as you can see in the translation table, these all interact with
-one another in some operators, so each function parameter has to carry a vector
-corresponding to the coefficients of all other parameters:
+So each parameter gets its own extra parameter corresponding to the derivative, distinct from all others. However, as you can see in the translation table, these derivative parameters interact with one another in some operators, so each function parameter has to carry a vector corresponding to the coefficients of all other parameters. Here's the basic number type:
 
     public readonly struct Number
     {
@@ -96,6 +89,6 @@ that exposes the arithmetic operators:
 Once you have your return value of type `Number`, you can access the derivatives
 of each parameter by its index:
 
-    var y = Calculus.DifferentiateAt(x0, x1, f);
+    var y = Calculus.DifferentiateAt(x0, x1, function);
     Console.WriteLine("x0' = " + y.Derivatives[0]);
     Console.WriteLine("x1' = " + y.Derivatives[1]);
