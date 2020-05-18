@@ -94,3 +94,10 @@ of each parameter by its index:
     var y = Calculus.DifferentiateAt(x0, x1, function);
     Console.WriteLine("x0' = " + y.Derivatives[0]);
     Console.WriteLine("x1' = " + y.Derivatives[1]);
+
+
+# Optimizations
+
+Most presentations of automatic differentiation show examples where you differentiate a function with respect to only a single parameter, but this technique computes *every derivative simultaneously*. Obviously that's more general, but most of the time you don't actually want all of the derivatives.
+
+When you only want one or two of the derivatives, the ϵ coefficient of all other parameters would be zero, in which case this technique is very wasteful. More efficient implementations are left as an exercise for the reader!
