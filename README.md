@@ -96,9 +96,9 @@ Once you have your return value of type `Number`, you can access the derivatives
 
 # Optimizations
 
-Most presentations of automatic differentiation show examples where you differentiate a function with respect to only a single parameter, but this technique computes *every derivative simultaneously*. Obviously that's more general, but you typically don't need all of the derivatives, making this technique a little wasteful.
+Most presentations of automatic differentiation show examples where you differentiate a function with respect to only a single parameter, but this technique computes *every derivative simultaneously*. Obviously that's more general, but you typically don't need all of the derivatives which makes this technique a little wasteful.
 
-So as a first optimization, review the starting configuration for automatic differentiation described above, and consider what happens when you're interested in the derivative of x0 *only*:
+So as a first optimization, start with the starting configuration for automatic differentiation described above and consider what happens when you're interested in the derivative of x0 *only*:
 
     public static Number Differentiate_X0(
         double x0, double x1, double x2,
@@ -107,6 +107,8 @@ So as a first optimization, review the starting configuration for automatic diff
              new Number(x1, 0, 0, 0),
              new Number(x2, 0, 0, 0));
 
-When you only want one of the derivatives, the ϵ coefficient of all other parameters would be zero, and all of those array slots filled with zeroes would stay zero throughout the whole computation. So toss them out! Create a Number type that doesn't incur any array allocations at all by replacing `Derivatives` with a single `System.Double` corresponding to the one parameter that's being differentiated. That parameter gets a 1 as the extra term when differentiating, the rest all start with 0.
+When you only want one of the derivatives, the ϵ coefficient of all other parameters would be zero, and all of those array slots filled with zeroes would stay zero throughout the whole computation. So toss them out!
 
-So while you can only differentiate with respect to one variable at a time, you only need to carry around an extra double for each step in the calculation. This would be very efficient!
+Create a specialized `Number` type that doesn't incur any array allocations at all by replacing `Derivatives` with a single `System.Double` corresponding to the one parameter that's being differentiated. That parameter gets a 1 as the extra term when differentiating, the rest all start with 0.
+
+So while you can only differentiate with respect to one variable at a time with this more specialized `Number` type, you only need to carry around an extra double for each step in the calculation. This would be very efficient!
