@@ -59,7 +59,7 @@ namespace AutoDiffSharp
         /// <param name="func">The function to evaluate.</param>
         /// <returns>The function's value and its derivatives at the given point.</returns>
         public static Number DifferentiateAt(double x, Func<Number, Number> func) =>
-            func(x);
+            func(new Number(x, 1));
 
         /// <summary>
         /// Evaluate and a function at the given point and return its derivatives.

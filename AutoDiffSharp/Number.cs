@@ -123,10 +123,34 @@ namespace AutoDiffSharp
             new Number(lhs.Magnitude + rhs.Magnitude, lhs.Derivatives + rhs.Derivatives);
 
         /// <summary>
+        /// Add two numbers.
+        /// </summary>
+        public static Number operator +(Number lhs, double rhs) =>
+            new Number(lhs.Magnitude + rhs, lhs.Derivatives);
+
+        /// <summary>
+        /// Add two numbers.
+        /// </summary>
+        public static Number operator +(double lhs, Number rhs) =>
+            rhs + lhs;
+
+        /// <summary>
         /// Subtract two numbers.
         /// </summary>
         public static Number operator -(Number lhs, Number rhs) =>
             new Number(lhs.Magnitude - rhs.Magnitude, lhs.Derivatives - rhs.Derivatives);
+
+        /// <summary>
+        /// Subtract two numbers.
+        /// </summary>
+        public static Number operator -(Number lhs, double rhs) =>
+            lhs + -rhs;
+
+        /// <summary>
+        /// Subtract two numbers.
+        /// </summary>
+        public static Number operator -(double lhs, Number rhs) =>
+            new Number(lhs - rhs.Magnitude, -rhs.Derivatives);
 
         /// <summary>
         /// Multiply two numbers.
@@ -182,17 +206,5 @@ namespace AutoDiffSharp
         /// </summary>
         public static Number operator *(int lhs, Number rhs) =>
             rhs * lhs;
-
-        /// <summary>
-        /// Convert double to a Number.
-        /// </summary>
-        public static implicit operator Number(double x) =>
-            new Number(x, 1);
-
-        /// <summary>
-        /// Convert int to a Number.
-        /// </summary>
-        public static implicit operator Number(int x) =>
-            new Number(x, 1);
     }
 }

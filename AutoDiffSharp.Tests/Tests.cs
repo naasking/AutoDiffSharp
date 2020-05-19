@@ -63,6 +63,21 @@ namespace AutoDiffSharp.Tests
         static Number SimplePoly3(Number a, Number b, Number c) =>
             c * (a + b).Pow(2);
 
+        [Theory]
+        [InlineData(5, 2, 4)]
+        [InlineData(1, 0, 0)]
+        [InlineData(2, 1, 2)]
+        [InlineData(17, 4, 8)]
+        public static void TestFunc(double y, double x, double dx)
+        {
+            var dy = Calculus.DifferentiateAt(x, Func);
+            Assert.Equal(y, dy.Magnitude);
+            Assert.Equal(dx, dy.Derivatives[0]);
+        }
+
+        static Number Func(Number x) =>
+            (x ^ 2) + 1;
+
         [Fact]
         public static void TestSample()
         {
