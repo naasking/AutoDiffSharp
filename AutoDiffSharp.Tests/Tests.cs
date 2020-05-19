@@ -81,6 +81,40 @@ namespace AutoDiffSharp.Tests
             (x ^ 2) + 1;
 
         [Theory]
+        [InlineData(0, 0, 2, 0, 0)]
+        [InlineData(1, 0, 2, 1, 3)]
+        [InlineData(2, 1, 2, 0, 0)]
+        [InlineData(3, 1, 2, 1, 3)]
+        [InlineData(12, 2, 2, 2, 12)]
+        public static void TestFunc2(double f, double y, double dy, double x, double dx)
+        {
+            var df = Calculus.DifferentiateAt(x, y, Func2);
+            Assert.Equal(f, df.Magnitude);
+            Assert.Equal(dx, df.Derivatives[0]);
+            Assert.Equal(dy, df.Derivatives[1]);
+        }
+
+        static Number Func2(Number x, Number y) =>
+            (x ^ 3) + 2 * y;
+
+        [Theory]
+        [InlineData(0, 0, 0, 0, 0)]
+        [InlineData(1, 0, 2, 1, 3)]
+        [InlineData(0, 1, 0, 0, 2)]
+        [InlineData(3, 1, 2, 1, 5)]
+        [InlineData(16, 2, 4, 2, 16)]
+        public static void TestFunc3(double f, double y, double dy, double x, double dx)
+        {
+            var df = Calculus.DifferentiateAt(x, y, Func3);
+            Assert.Equal(f, df.Magnitude);
+            Assert.Equal(dx, df.Derivatives[0]);
+            Assert.Equal(dy, df.Derivatives[1]);
+        }
+
+        static Number Func3(Number x, Number y) =>
+            (x ^ 3) + 2 * y * x;
+
+        [Theory]
         [InlineData(0, 0, 0)]
         [InlineData(3, 1, 11)]
         [InlineData(48, 2, 104)]
