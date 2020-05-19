@@ -2,7 +2,7 @@
 
 Simple automatic differentiation (AD) in C# that uses operator overloading to implement dual numbers.
 
-This isn't a super efficient implementation, but it's probably fine for small functions and tests, and for learning how AD works.
+This isn't a super efficient implementation, but it's probably fine for small functions and tests, and for learning how AD works. If you only need AD for differentiating with respect to one variable, see the "Optimizations" section below for a very efficient specialization of the approach described here.
 
 # Dual Numbers
 
