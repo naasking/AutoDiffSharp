@@ -68,6 +68,8 @@ namespace AutoDiffSharp.Tests
         [InlineData(1, 0, 0)]
         [InlineData(2, 1, 2)]
         [InlineData(17, 4, 8)]
+        [InlineData(82, 9, 18)]
+        [InlineData(2, -1, -2)]
         public static void TestFunc(double y, double x, double dx)
         {
             var dy = Calculus.DifferentiateAt(x, Func);
@@ -77,6 +79,37 @@ namespace AutoDiffSharp.Tests
 
         static Number Func(Number x) =>
             (x ^ 2) + 1;
+
+        [Theory]
+        [InlineData(0, 0, 0)]
+        [InlineData(3, 1, 11)]
+        [InlineData(48, 2, 104)]
+        [InlineData(-3, -1, 11)]
+        public static void TestQuintile(double y, double x, double dx)
+        {
+            var dy = Calculus.DifferentiateAt(x, Quintile);
+            Assert.Equal(y, dy.Magnitude);
+            Assert.Equal(dx, dy.Derivatives[0]);
+        }
+
+        static Number Quintile(Number x) =>
+            (x ^ 5) + 2 * (x ^ 3);
+
+        [Theory]
+        [InlineData(0, 0, 0)]
+        [InlineData(3, 1, 11)]
+        [InlineData(48, 2, 104)]
+        [InlineData(-3, -1, 11)]
+        public static void TestQuintile2(double y, double x, double dx)
+        {
+            var dy = Calculus.DifferentiateAt(x, Quintile2);
+            Assert.Equal(y, dy.Magnitude);
+            Assert.Equal(dx, dy.Derivatives[0]);
+        }
+
+        // Same as Quintile, just refactored to ensure outcome is the same
+        static Number Quintile2(Number x) =>
+            (x ^ 3) * ((x ^ 2) + 2);
 
         [Fact]
         public static void TestSample()
