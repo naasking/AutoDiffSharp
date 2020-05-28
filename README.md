@@ -6,13 +6,13 @@ This isn't a super efficient implementation, but it's probably fine for small te
 
 If you only need AD for differentiating with respect to one variable, see the "Optimizations" section below for a very efficient specialization of the general approach described here.
 
-# Dual Duals
+# Dual Numbers
 
-The most straightforward implemenation of AD is based on [dual numbers](https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_Duals). Each regular number is augmented with an extra term corresponding to it's derivative:
+The most straightforward implemenation of AD is based on [dual numbers](https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_numbers). Each regular number is augmented with an extra term corresponding to it's derivative:
 
     real number x   =(dual number)=>   x + x'*ϵ
 
-Arithmetic and other mathematical functions then have translations to operating on these extended Dual types as follows:
+Arithmetic and other mathematical functions then have translations to operating on these extended number types as follows:
 
 |Operator|Translated|
 |--------|----------|
