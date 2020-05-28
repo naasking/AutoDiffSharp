@@ -1,18 +1,18 @@
 # AutoDiffSharp
 
-Simple automatic differentiation (AD) in C# that uses operator overloading to implement dual numbers.
+Simple automatic differentiation (AD) in C# that uses operator overloading to implement dual Duals.
 
 This isn't a super efficient implementation, but it's probably fine for small tests and for learning how AD works.
 
 If you only need AD for differentiating with respect to one variable, see the "Optimizations" section below for a very efficient specialization of the general approach described here.
 
-# Dual Numbers
+# Dual Duals
 
-The most straightforward implemenation of AD is based on [dual numbers](https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_numbers). Each regular number is augmented with an extra term corresponding to it's derivative:
+The most straightforward implemenation of AD is based on [dual numbers](https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_Duals). Each regular number is augmented with an extra term corresponding to it's derivative:
 
     real number x   =(dual number)=>   x + x'*ϵ
 
-Arithmetic and other mathematical functions then have translations to operating on these extended number types as follows:
+Arithmetic and other mathematical functions then have translations to operating on these extended Dual types as follows:
 
 |Operator|Translated|
 |--------|----------|
@@ -30,99 +30,9 @@ Invoking a function "f" with dual numbers operates like this, in math notation:
 
 > f(x0 + ϵ<sub>x1</sub>, x1 + ϵ<sub>x2</sub>, x2 + ϵ<sub>x2</sub>)
 
-Each parameter carries an extra 'ϵ' value corresponding to the derivative, and this extra value is distinct from the 'ϵ' values of all other parameters. However, as you can see in the translation table, these derivatives interact with one another in some operators, so a general number type carries a vector for the coefficients of all other parameters. Here's the basic number type:
+Each parameter carries an extra 'ϵ' value corresponding to the derivative, and this extra value is distinct from the 'ϵ' values of all other parameters. In order to carry all the derivatives of all input parameters, we'd need an array of derivatives where the index corresponds to the derivative for the parameter at that index. This is pretty inefficient however, but if you're interested to see how that works, check out the [history of this repo here](https://github.com/naasking/AutoDiffSharp/tree/d5fd521cf784feab7e7209dd078abe9a7ff2f4be).
 
-```csharp
-public readonly struct Number
-{
-    public readonly double Magnitude;
-    public readonly double[] Derivatives;
-
-    internal Number(double m, params double[] d)
-    {
-        this.Magnitude = m;
-        this.Derivatives = d;
-    }
-}
-```
-
-A differentiable function of 3 parameters would have this signature:
-
-```csharp
-Number Function(Number x0, Number x1, Number x2)
-```
-
-Internally, differentiation invokes the function like this:
-
-```csharp
-public static Number DifferentiateAt(
-    double x0, double x1, double x2,
-    Func<Number, Number, Number, Number> func) =>
-    func(new Number(x0, 1, 0, 0),
-         new Number(x1, 0, 1, 0),
-         new Number(x2, 0, 0, 1));
-```
-
-Each parameter is initialized with zeroes everywhere except for a 1 in the derivative slot corresponding to its position in the argument list. This is the necessary starting configuration for automatic differentiation in order to compute the derivatives for any of the parameters.
-
-Operators are now pretty straightforward, corresponding to operations on the magnitude and pairwise operations on each index of the array:
-
-```csharp
-public static Number operator +(Number lhs, Number rhs) =>
-    new Number(lhs.Magnitude + rhs.Magnitude,
-               lhs.Derivatives + rhs.Derivatives);
-
-public static Number operator *(Number lhs, Number rhs) =>
-    new Number(lhs.Magnitude * rhs.Magnitude,
-               lhs.Derivatives * rhs.Magnitude + rhs.Derivatives * lhs.Magnitude);
-```
-
-Obviously you can't add or multiply two `double[]` like I've shown here, but the actual implementation hides the array behind a `Derivatives` type that exposes the arithmetic operators:
-
-```csharp
-public static Derivatives operator +(Derivatives lhs, Derivatives rhs)
-{
-    var v = new double[lhs.Count];
-    for (int i = 0; i < lhs.vector.Length; ++i)
-        v[i] = lhs.vector[i] + rhs.vector[i];
-    return new Derivatives(v);
-}
-
-public static Derivatives operator *(Derivatives lhs, Derivatives rhs)
-{
-    var v = new double[lhs.Count];
-    for (int i = 0; i < lhs.vector.Length; ++i)
-        v[i] = lhs.vector[i] * rhs.vector[i];
-    return new Derivatives(v);
-}
-```
-
-Once you have your return value of type `Number`, you can access the derivatives of each parameter by its index:
-
-```csharp
-var y = Calculus.DifferentiateAt(x0, x1, function);
-Console.WriteLine("x0' = " + y.Derivatives[0]);
-Console.WriteLine("x1' = " + y.Derivatives[1]);
-```
-
-# Optimizations
-
-Most presentations of automatic differentiation show examples where you differentiate a function with respect to only a single parameter, but this technique computes *every derivative simultaneously*. Obviously that's more general, but you typically don't need all of the derivatives which makes this technique a little wasteful.
-
-So as a first optimization, start with the starting configuration for automatic differentiation described above and consider what happens when you're interested in the derivative of x0 *only*:
-
-```csharp
-public static Number Differentiate_X0(
-    double x0, double x1, double x2,
-    Func<Number, Number, Number, Number> func) =>
-    func(new Number(x0, 1, 0, 0),
-         new Number(x1, 0, 0, 0),
-         new Number(x2, 0, 0, 0));
-```
-
-When you only want one of the derivatives, the ϵ coefficient of all other parameters would be zero, and all of those array slots filled with zeroes would stay zero throughout the whole computation. So toss them out!
-
-Create a specialized `Number` type that doesn't incur any array allocations at all by replacing `Derivatives` with a single `System.Double` corresponding to the one parameter that's being differentiated. That parameter gets a 1 as the extra term when differentiating, the rest all start with 0. See `Dual.cs` for an implementation of this type:
+In order to make differentiation efficient, we'll first implement so-called forward mode automatic differentiation with dual numbers:
 
 ```csharp
 public readonly struct Dual
@@ -130,7 +40,7 @@ public readonly struct Dual
     public readonly double Magnitude;
     public readonly double Derivative;
 
-    internal Number(double m, double d)
+    internal Dual(double m, double d)
     {
         this.Magnitude = m;
         this.Derivative = d;
@@ -138,7 +48,48 @@ public readonly struct Dual
 }
 ```
 
-So while you can only differentiate with respect to one variable at a time with `Dual`, you only need to carry around an extra double for each step in the calculation. This would be very efficient!
+Since the dual number only carries around a single derivative, it must correspond to only one of the ϵ<sub>x</sub> values, which means we can only take the derivative of one of the input parameters at a time. See the section below on reverse mode automatic differentiation for an efficient way to compute *all* derivatives simultaneously.
+
+A differentiable function of 3 parameters would have this signature:
+
+```csharp
+Dual Function(Dual x0, Dual x1, Dual x2)
+```
+
+Internally, differentiation invokes the function like this:
+
+```csharp
+public static Dual DifferentiateX0At(
+    double x0, double x1, double x2,
+    Func<Dual, Dual, Dual, Dual> func) =>
+    func(new Dual(x0, 1),
+         new Dual(x1, 0),
+         new Dual(x2, 0));
+```
+
+Each parameter is initialized with zeroes except for the derivative we're interested in.
+
+Operators are now pretty straightforward, corresponding to operations on the magnitude and derivative:
+
+```csharp
+public static Dual operator +(Dual lhs, Dual rhs) =>
+    new Dual(lhs.Magnitude + rhs.Magnitude,
+             lhs.Derivative + rhs.Derivative);
+
+public static Dual operator *(Dual lhs, Dual rhs) =>
+    new Dual(lhs.Magnitude * rhs.Magnitude,
+             lhs.Derivative * rhs.Magnitude + rhs.Derivative * lhs.Magnitude);
+```
+
+Once you have your return value of type `Dual`, you can access the derivative:
+
+```csharp
+var y_dx0 = Calculus.DifferentiateX0At(x0, x1, function);
+Console.WriteLine("x0' = " + y_dx0.Derivative);
+
+var y_dx1 = Calculus.DifferentiateX1At(x0, x1, function);
+Console.WriteLine("x1' = " + y_dx1.Derivative);
+```
 
 # Reverse Mode Automatic Differentiation
 
@@ -150,7 +101,7 @@ public readonly struct Codual
     public readonly double Magnitude;
     public readonly Action<double> Derivative;
 
-    internal Number(double m, Action<double> d)
+    internal Dual(double m, Action<double> d)
     {
         this.Magnitude = m;
         this.Derivative = d;
@@ -172,6 +123,8 @@ public readonly struct Codual
 }
 ```
 
-The advantage here is that the continuation eliminates the need to build NxM arrays to track the derivative vectors, while still retaining the ability to compute the derivatives of all input parameters simultaneously.
+The advantage here is that the continuation eliminates the need to build NxM arrays to track the derivative vectors as I was doing in an older version of this repo, while still retaining the ability to compute the derivatives of all input parameters simultaneously.
 
-In general, forward-mode AD is best suited for functions of type R->R<sup>N</sup>, which are functions of a single real number to a set of real numbers, where reverse mode AD is best suited for functions of type R<sup>N</sup>->R. The latter type are pretty common in machine learning these days.
+In general, forward-mode AD is best suited for functions of type R->R<sup>N</sup>, which are functions of a single real Dual to a set of real Duals, where reverse mode AD is best suited for functions of type R<sup>N</sup>->R. The latter type are pretty common in machine learning these days.
+
+This means reverse mode AD is not suitable for functions that outputs many results, or functions in which you're only interested in a small subset of the derivatives.
