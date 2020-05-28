@@ -9,13 +9,13 @@ namespace AutoDiffSharp.Tests
         [Fact]
         public static void BasicTests()
         {
-            Assert.Equal(1, new Number(1).Magnitude);
-            Assert.Equal(3, (new Number(1) + new Number(2)).Magnitude);
-            Assert.Equal(new Number(1), new Number(1));
-            Assert.NotEqual(new Number(2), new Number(1));
-            var x = new Number(2);
+            Assert.Equal(1, new Dual(1).Magnitude);
+            Assert.Equal(3, (new Dual(1) + new Dual(2)).Magnitude);
+            Assert.Equal(new Dual(1), new Dual(1));
+            Assert.NotEqual(new Dual(2), new Dual(1));
+            var x = new Dual(2);
             Assert.Equal(4, (x + x).Magnitude);
-            Assert.Equal(0, (x + x).Derivatives[0]);
+            Assert.Equal(0, (x + x).Derivative);
             Assert.Equal(0, (x - x).Magnitude);
             Assert.Equal(0, (-x + x).Magnitude);
             Assert.Equal(6, (x * 3).Magnitude);
@@ -36,7 +36,7 @@ namespace AutoDiffSharp.Tests
         [Fact]
         public static void TestPow()
         {
-            var x = new Number(25);
+            var x = new Dual(25);
             Assert.Equal(x * x, x ^ 2);
         }
 
@@ -45,8 +45,8 @@ namespace AutoDiffSharp.Tests
         {
             var z = Calculus.DerivativeAt(5, 2, SimplePoly2);
             Assert.Equal(59, z.Magnitude);
-            Assert.Equal(30, z.Derivatives[0]);
-            Assert.Equal(-24, z.Derivatives[1]);
+            Assert.Equal(30, z.Derivative(0));
+            Assert.Equal(-24, z.Derivative(1));
         }
 
         static Codual SimplePoly2(Codual x, Codual y) =>
@@ -57,7 +57,7 @@ namespace AutoDiffSharp.Tests
         {
             var z = Calculus.DerivativeAt(1, 0.5, 2, SimplePoly3);
             Assert.Equal(4.5, z.Magnitude);
-            Assert.Equal(6, z.Derivatives[0]);
+            Assert.Equal(6, z.Derivative(0));
         }
 
         static Codual SimplePoly3(Codual a, Codual b, Codual c) =>
@@ -74,10 +74,10 @@ namespace AutoDiffSharp.Tests
         {
             var dy = Calculus.DerivativeAt(x, Func);
             Assert.Equal(y, dy.Magnitude);
-            Assert.Equal(dx, dy.Derivatives[0]);
+            Assert.Equal(dx, dy.Derivative);
         }
 
-        static Number Func(Number x) =>
+        static Dual Func(Dual x) =>
             (x ^ 2) + 1;
 
         [Theory]
@@ -90,8 +90,8 @@ namespace AutoDiffSharp.Tests
         {
             var df = Calculus.DerivativeAt(x, y, Func2);
             Assert.Equal(f, df.Magnitude);
-            Assert.Equal(dx, df.Derivatives[0]);
-            Assert.Equal(dy, df.Derivatives[1]);
+            Assert.Equal(dx, df.Derivative(0));
+            Assert.Equal(dy, df.Derivative(1));
         }
 
         static Codual Func2(Codual x, Codual y) =>
@@ -107,8 +107,8 @@ namespace AutoDiffSharp.Tests
         {
             var df = Calculus.DerivativeAt(x, y, Func3);
             Assert.Equal(f, df.Magnitude);
-            Assert.Equal(dx, df.Derivatives[0]);
-            Assert.Equal(dy, df.Derivatives[1]);
+            Assert.Equal(dx, df.Derivative(0));
+            Assert.Equal(dy, df.Derivative(1));
         }
 
         static Codual Func3(Codual x, Codual y) =>
@@ -123,10 +123,10 @@ namespace AutoDiffSharp.Tests
         {
             var dy = Calculus.DerivativeAt(x, Quintile);
             Assert.Equal(y, dy.Magnitude);
-            Assert.Equal(dx, dy.Derivatives[0]);
+            Assert.Equal(dx, dy.Derivative);
         }
 
-        static Number Quintile(Number x) =>
+        static Dual Quintile(Dual x) =>
             (x ^ 5) + 2 * (x ^ 3);
 
         [Theory]
@@ -138,11 +138,11 @@ namespace AutoDiffSharp.Tests
         {
             var dy = Calculus.DerivativeAt(x, Quintile2);
             Assert.Equal(y, dy.Magnitude);
-            Assert.Equal(dx, dy.Derivatives[0]);
+            Assert.Equal(dx, dy.Derivative);
         }
 
         // Same as Quintile, just refactored to ensure outcome is the same
-        static Number Quintile2(Number x) =>
+        static Dual Quintile2(Dual x) =>
             (x ^ 3) * ((x ^ 2) + 2);
 
         [Fact]
@@ -150,7 +150,7 @@ namespace AutoDiffSharp.Tests
         {
             var y = Calculus.DerivativeAt(2, 3, Sample);
             Assert.Equal(5.947664043757056, y.Magnitude);
-            Assert.Equal(1.0013704652454263, y.Derivatives[1]);
+            Assert.Equal(1.0013704652454263, y.Derivative(1));
         }
 
         static Codual Sample(Codual x1, Codual x2) =>
