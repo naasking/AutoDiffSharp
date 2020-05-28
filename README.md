@@ -174,5 +174,4 @@ public readonly struct Codual
 
 The advantage here is that the continuation eliminates the need to build NxM arrays to track the derivative vectors, while still retaining the ability to compute the derivatives of all input parameters simultaneously.
 
-
 In general, forward-mode AD is best suited for functions of type R->R<sup>N</sup>, which are functions of a single real number to a set of real numbers, where reverse mode AD is best suited for functions of type R<sup>N</sup>->R. The latter type are pretty common in machine learning these days.

@@ -27,10 +27,10 @@ namespace AutoDiffSharp.Tests
             Assert.Equal(x, x);
             Assert.Equal(0, x.CompareTo(x));
             //Assert.Equal(default, x - x);
-            Assert.Equal(Math.Cos(3), Calculus.DerivativeAt(3, (Number x) => x.Cos()).Magnitude);
-            Assert.Equal(-Math.Sin(3), Calculus.DerivativeAt(3, (Number x) => x.Cos()).Derivatives[0]);
-            Assert.Equal(Math.Sin(3), Calculus.DerivativeAt(3, (Number x) => x.Sin()).Magnitude);
-            Assert.Equal(Math.Cos(3), Calculus.DerivativeAt(3, (Number x) => x.Sin()).Derivatives[0]);
+            Assert.Equal(Math.Cos(3), Calculus.DerivativeAt(3, (Dual x) => x.Cos()).Magnitude);
+            Assert.Equal(-Math.Sin(3), Calculus.DerivativeAt(3, (Dual x) => x.Cos()).Derivative);
+            Assert.Equal(Math.Sin(3), Calculus.DerivativeAt(3, (Dual x) => x.Sin()).Magnitude);
+            Assert.Equal(Math.Cos(3), Calculus.DerivativeAt(3, (Dual x) => x.Sin()).Derivative);
         }
 
         [Fact]
