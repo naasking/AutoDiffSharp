@@ -1,8 +1,8 @@
 # AutoDiffSharp
 
-Simple automatic differentiation (AD) in C# that uses operator overloading to implement dual numbers for forward mode AD, and what seems to be a new representation for the dual of dual numbers, Codual numbers that implement reverse mode AD.
+This repo implements simple automatic differentiation (AD) in C# via operator overloading to implement dual numbers for forward mode AD, and what seems to be a new representation for the dual of dual numbers, Codual numbers that implement reverse mode AD.
 
-This probably isn't a super efficient implementation, but it's probably fine for small tests and for learning how AD works.
+This probably isn't a super efficient implementation, but it's fine for small tests and for learning how AD works.
 
 # Dual Numbers
 
@@ -91,7 +91,7 @@ Console.WriteLine("x1' = " + y_dx1.Derivative);
 
 # Reverse Mode Automatic Differentiation
 
-The above description is for forward-mode AD, but taking the dual of the `Dual` type above yields a representation for so-called "reverse mode" AD. Instead of computing the derivative alongside the value, we instead construct a *continuation* that runs the derivative computation *backwards* from outputs to inputs, which is why it can efficiently compute the derivative of all input parameters, where `Dual` is restricted to the derivative of only one parameter. See `Codual.cs`:
+The above description is for forward-mode AD, but taking the dual of the `Dual` type above yields a representation for so-called "reverse mode" AD. Instead of computing the derivative alongside the value, we instead construct a *continuation* that runs the derivative computation *backwards* from outputs to inputs:
 
 ```csharp
 public readonly struct Codual
@@ -121,13 +121,15 @@ public readonly struct Codual
 }
 ```
 
-The advantage here is that the continuation eliminates the need to build NxM arrays to track the derivative vectors as I was doing in an older version of this repo, while still retaining the ability to compute the derivatives of all input parameters simultaneously:
+Where `Dual` is restricted to efficiently computing the derivative of only one parameter, `Codual` can efficiently compute the derivative of *all* parameters simultaneously:
 
 ```csharp
 var y = Calculus.DifferentiateAt(x0, x1, function);
 Console.WriteLine("x0' = " + y.Derivative(0));
 Console.WriteLine("x1' = " + y.Derivative(1));
 ```
+
+We can achieve the same for `Dual` by using a vector of derivatives instead of a single derivative, as I was doing in an [older version of this repo](https://github.com/naasking/AutoDiffSharp/tree/d5fd521cf784feab7e7209dd078abe9a7ff2f4be), but this has considerably worse space and time complexity.
 
 In general, forward-mode AD is best suited for functions of type R->R<sup>N</sup>, which are functions of a single real number to a set of real numbers, where reverse mode AD is best suited for functions of type R<sup>N</sup>->R. The latter type are pretty common in machine learning these days.
 
