@@ -91,7 +91,7 @@ Console.WriteLine("x1' = " + y_dx1.Derivative);
 
 # Reverse Mode Automatic Differentiation
 
-The above description is for forward-mode AD, but there's a dual representation of forward mode with properties that can replace the vector representation above with an abstraction that takes only linear space. This is called reverse mode automatic differentiation. Instead of computing the derivative alongside the value, we instead construct a *continuation* that computes the derivatives *backwards*, see `Codual.cs`:
+The above description is for forward-mode AD, but taking the dual of the `Dual` type above yields a representation for so-called "reverse mode" AD. Instead of computing the derivative alongside the value, we instead construct a *continuation* that runs the derivative computation *backwards* from outputs to inputs, which is why it can efficiently compute the derivative of all input parameters, where `Dual` is restricted to the derivative of only one parameter. See `Codual.cs`:
 
 ```csharp
 public readonly struct Codual
