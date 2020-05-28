@@ -31,10 +31,10 @@ namespace AutoDiffSharp
         {
         }
 
-        internal Number(double x, Derivatives diff)
+        internal Number(double x, Derivatives dx)
         {
             this.Magnitude = x;
-            this.Derivatives = diff;
+            this.Derivatives = dx;
         }
 
         /// <summary>

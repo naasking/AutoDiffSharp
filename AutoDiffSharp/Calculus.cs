@@ -10,6 +10,7 @@ namespace AutoDiffSharp
     /// </summary>
     public static class Calculus
     {
+        #region Number vectors
         /// <summary>
         /// Evaluate and a function at the given point without differentiating.
         /// </summary>
@@ -58,7 +59,7 @@ namespace AutoDiffSharp
         /// <param name="x">The function argument.</param>
         /// <param name="func">The function to evaluate.</param>
         /// <returns>The function's value and its derivatives at the given point.</returns>
-        public static Number DifferentiateAt(double x, Func<Number, Number> func) =>
+        public static Number DerivativeAt(double x, Func<Number, Number> func) =>
             func(new Number(x, 1));
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace AutoDiffSharp
         /// <param name="x1">The function argument.</param>
         /// <param name="func">The function to evaluate.</param>
         /// <returns>The function's value and its derivatives at the given point.</returns>
-        public static Number DifferentiateAt(double x0, double x1, Func<Number, Number, Number> func) =>
+        public static Number DerivativeAt(double x0, double x1, Func<Number, Number, Number> func) =>
             func(new Number(x0, 1, 0), new Number(x1, 0, 1));
 
         /// <summary>
@@ -79,7 +80,7 @@ namespace AutoDiffSharp
         /// <param name="x2">The function argument.</param>
         /// <param name="func">The function to evaluate.</param>
         /// <returns>The function's value and its derivatives at the given point.</returns>
-        public static Number DifferentiateAt(double x0, double x1, double x2, Func<Number, Number, Number, Number> func) =>
+        public static Number DerivativeAt(double x0, double x1, double x2, Func<Number, Number, Number, Number> func) =>
             func(new Number(x0, 1, 0, 0), new Number(x1, 0, 0, 1), new Number(x2, 0, 0, 1));
 
         /// <summary>
@@ -91,7 +92,7 @@ namespace AutoDiffSharp
         /// <param name="x3">The function argument.</param>
         /// <param name="func">The function to evaluate.</param>
         /// <returns>The function's value and its derivatives at the given point.</returns>
-        public static Number DifferentiateAt(double x0, double x1, double x2, double x3, Func<Number, Number, Number, Number, Number> func) =>
+        public static Number DerivativeAt(double x0, double x1, double x2, double x3, Func<Number, Number, Number, Number, Number> func) =>
             func(new Number(x0, 1, 0, 0, 0), new Number(x1, 0, 0, 1, 0), new Number(x2, 0, 0, 1, 0), new Number(x3, 0, 0, 0, 1));
 
         /// <summary>
@@ -100,7 +101,7 @@ namespace AutoDiffSharp
         /// <param name="x">The function arguments.</param>
         /// <param name="func">The function to evaluate.</param>
         /// <returns>The function's value and its derivatives at the given point.</returns>
-        public static Number DifferentiateAt(double[] x, Func<Number[], Number> func) =>
+        public static Number DerivativeAt(double[] x, Func<Number[], Number> func) =>
             func(x.Select((y, i) =>
             {
                 var v = new double[x.Length];
@@ -116,7 +117,7 @@ namespace AutoDiffSharp
         /// <param name="func">The function to evaluate.</param>
         /// <returns>A function that's the differentiation of <paramref name="func"/>.</returns>
         public static Func<double, Number> Differentiate(Func<Number, Number> func) =>
-            x => DifferentiateAt(x, func);
+            x => DerivativeAt(x, func);
 
         /// <summary>
         /// Evaluate and a function at the given point and return its derivatives.
@@ -126,7 +127,7 @@ namespace AutoDiffSharp
         /// <param name="func">The function to evaluate.</param>
         /// <returns>A function that's the differentiation of <paramref name="func"/>.</returns>
         public static Func<double, double, Number> Differentiate(Func<Number, Number, Number> func) =>
-            (x0, x1) => DifferentiateAt(x0, x1, func);
+            (x0, x1) => DerivativeAt(x0, x1, func);
 
         /// <summary>
         /// Evaluate and a function at the given point and return its derivatives.
@@ -137,7 +138,7 @@ namespace AutoDiffSharp
         /// <param name="func">The function to evaluate.</param>
         /// <returns>A function that's the differentiation of <paramref name="func"/>.</returns>
         public static Func<double, double, double, Number> Differentiate(Func<Number, Number, Number, Number> func) =>
-            (x0, x1, x2) => DifferentiateAt(x0, x1, x2, func);
+            (x0, x1, x2) => DerivativeAt(x0, x1, x2, func);
 
         /// <summary>
         /// Differentiate a function.
@@ -149,6 +150,64 @@ namespace AutoDiffSharp
         /// <param name="func">The function to evaluate.</param>
         /// <returns>A function that's the differentiation of <paramref name="func"/>.</returns>
         public static Func<double, double, double, double, Number> Differentiate(Func<Number, Number, Number, Number, Number> func) =>
-            (x0, x1, x2, x3) => DifferentiateAt(x0, x1, x2, x3, func);
+            (x0, x1, x2, x3) => DerivativeAt(x0, x1, x2, x3, func);
+
+        #endregion
+
+        #region Dual numbers
+
+        #endregion
+
+        #region CoDual Numbers
+
+        public static Dual DerivativeAt(double x, Func<Codual, Codual> f)
+        {
+            var dx = 0.0;
+            var y = f(new Codual(x, dy => dx += dy));
+            y.Derivative(1);
+            return new Dual(y.Magnitude, dx);
+        }
+
+        public static Number DerivativeAt(double x0, double x1, Func<Codual, Codual, Codual> f)
+        {
+            double dx0 = 0, dx1 = 0;
+            var y = f(new Codual(x0, dy => dx0 += dy),
+                      new Codual(x1, dy => dx1 += dy));
+            y.Derivative(1);
+            return new Number(y.Magnitude, dx0, dx1);
+        }
+
+        public static Number DerivativeAt(double x0, double x1, double x2, Func<Codual, Codual, Codual, Codual> f)
+        {
+            double dx0 = 0, dx1 = 0, dx2 = 0;
+            var y = f(new Codual(x0, dy => dx0 += dy),
+                      new Codual(x1, dy => dx1 += dy),
+                      new Codual(x2, dy => dx2 += dy));
+            y.Derivative(1);
+            return new Number(y.Magnitude, dx0, dx1, dx2);
+        }
+
+        public static Number DerivativeAt(double[] x, Func<Codual[], Codual> f)
+        {
+            var dx = new double[x.Length];
+            var args = x.Select((z, i) => new Codual(z, dz => dx[i] += dz)).ToArray();
+            var y = f(args);
+            y.Derivative(1);
+            return new Number(y.Magnitude, dx);
+        }
+
+        public static Func<double, Dual> Differentiate(this Func<Codual, Codual> f) =>
+            x => DerivativeAt(x, f);
+
+        public static Func<double, double, Number> Differentiate(this Func<Codual, Codual, Codual> f) =>
+            (x0, x1) => DerivativeAt(x0, x1, f);
+
+        public static Func<double, double, double, Number> Differentiate(Func<Codual, Codual, Codual, Codual> f) =>
+            (x0, x1, x2) => DerivativeAt(x0, x1, x2, f);
+
+        public static Func<double[], Number> Differentiate(this Func<Codual[], Codual> f) =>
+            x => DerivativeAt(x, f);
+
+        #endregion
     }
 }
