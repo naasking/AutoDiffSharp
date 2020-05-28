@@ -1,10 +1,8 @@
 # AutoDiffSharp
 
-Simple automatic differentiation (AD) in C# that uses operator overloading to implement dual Duals.
+Simple automatic differentiation (AD) in C# that uses operator overloading to implement dual numbers for forward mode AD, and what seems to be a new representation for the dual of dual numbers, Codual numbers that implement reverse mode AD.
 
-This isn't a super efficient implementation, but it's probably fine for small tests and for learning how AD works.
-
-If you only need AD for differentiating with respect to one variable, see the "Optimizations" section below for a very efficient specialization of the general approach described here.
+This probably isn't a super efficient implementation, but it's probably fine for small tests and for learning how AD works.
 
 # Dual Numbers
 
