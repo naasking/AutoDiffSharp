@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Sandro magi</Authors>
+    <Company>Higher Logics</Company>
+    <Description>Forward mode and reverse mode dual/codual numbers for automatic differentiation.</Description>
+    <Copyright>Sandro Magi 2020</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/naasking/AutoDiffSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/naasking/AutoDiffSharp</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
 </Project>
