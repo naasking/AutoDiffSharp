@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Diagnostics.SymbolStore;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace AutoDiffSharp
 {
     /// <summary>
-    /// The numeric type fpr reverse-mode automatic differentiation.
+    /// The numeric type for reverse-mode automatic differentiation.
     /// </summary>
     public readonly struct Codual : IEquatable<Codual>, IComparable<Codual>
     {
