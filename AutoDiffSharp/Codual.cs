@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.SymbolStore;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace AutoDiffSharp
@@ -127,11 +128,14 @@ namespace AutoDiffSharp
         /// Add two Coduals.
         /// </summary>
         public static Codual operator +(Codual lhs, Codual rhs) =>
-            new Codual(lhs.Magnitude + rhs.Magnitude, dx =>
-            {
-                lhs.Derivative(dx);
-                rhs.Derivative(dx);
-            });
+            new Codual(lhs.Magnitude + rhs.Magnitude,
+                lhs.Derivative == rhs.Derivative
+                ? new Action<double>(dx => lhs.Derivative(2 * dx))
+                : dx =>
+                {
+                    lhs.Derivative(dx);
+                    rhs.Derivative(dx);
+                });
 
         /// <summary>
         /// Add two Coduals.
@@ -149,7 +153,9 @@ namespace AutoDiffSharp
         /// Subtract two Coduals.
         /// </summary>
         public static Codual operator -(Codual lhs, Codual rhs) =>
-            new Codual(lhs.Magnitude - rhs.Magnitude, dx =>
+            new Codual(lhs.Magnitude - rhs.Magnitude, lhs.Derivative == rhs.Derivative
+            ? new Action<double>(dx => { })
+            : dx =>
             {
                 lhs.Derivative(dx);
                 rhs.Derivative(-dx);
@@ -171,7 +177,9 @@ namespace AutoDiffSharp
         /// Multiply two Coduals.
         /// </summary>
         public static Codual operator *(Codual lhs, Codual rhs) =>
-            new Codual(lhs.Magnitude * rhs.Magnitude, dx =>
+            new Codual(lhs.Magnitude * rhs.Magnitude, lhs.Derivative == rhs.Derivative
+            ? new Action<double>(dx => lhs.Derivative(2 * dx * lhs.Magnitude))
+            : dx =>
             {
                 lhs.Derivative(dx * rhs.Magnitude);
                 rhs.Derivative(dx * lhs.Magnitude);
@@ -181,7 +189,9 @@ namespace AutoDiffSharp
         /// Divide two Coduals.
         /// </summary>
         public static Codual operator /(Codual lhs, Codual rhs) =>
-            new Codual(lhs.Magnitude / rhs.Magnitude, dx =>
+            new Codual(lhs.Magnitude / rhs.Magnitude, lhs.Derivative == rhs.Derivative
+            ? new Action<double>(dx => { })
+            : dx =>
             {
                 var d = rhs.Magnitude * rhs.Magnitude;
                 lhs.Derivative(dx * rhs.Magnitude / d);
