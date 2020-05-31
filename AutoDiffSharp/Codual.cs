@@ -127,6 +127,8 @@ namespace AutoDiffSharp
         /// Add two Coduals.
         /// </summary>
         public static Codual operator +(Codual lhs, Codual rhs) =>
+            // if lhs == rhs, then propagate value only once to avoid exponential
+            // blowup, ie. loop(N) { x = x + x } updates dx 2^N times in the naive case.
             new Codual(lhs.Magnitude + rhs.Magnitude,
                 lhs.Derivative == rhs.Derivative
                 ? new Action<double>(dx => lhs.Derivative(2 * dx))
@@ -152,6 +154,7 @@ namespace AutoDiffSharp
         /// Subtract two Coduals.
         /// </summary>
         public static Codual operator -(Codual lhs, Codual rhs) =>
+            // if lhs == rhs, then contribution to derivative is zero
             new Codual(lhs.Magnitude - rhs.Magnitude, lhs.Derivative == rhs.Derivative
             ? new Action<double>(dx => { })
             : dx =>
@@ -176,6 +179,8 @@ namespace AutoDiffSharp
         /// Multiply two Coduals.
         /// </summary>
         public static Codual operator *(Codual lhs, Codual rhs) =>
+            // if lhs == rhs, then propagate value only once to avoid exponential
+            // blowup, ie. loop(N) { x = x * x } updates dx 2^N times in the naive case.
             new Codual(lhs.Magnitude * rhs.Magnitude, lhs.Derivative == rhs.Derivative
             ? new Action<double>(dx => lhs.Derivative(2 * dx * lhs.Magnitude))
             : dx =>
@@ -188,6 +193,7 @@ namespace AutoDiffSharp
         /// Divide two Coduals.
         /// </summary>
         public static Codual operator /(Codual lhs, Codual rhs) =>
+            // if lhs == rhs, then contribution to derivative is zero
             new Codual(lhs.Magnitude / rhs.Magnitude, lhs.Derivative == rhs.Derivative
             ? new Action<double>(dx => { })
             : dx =>
