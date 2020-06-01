@@ -142,7 +142,7 @@ namespace AutoDiffSharp
         /// Add two Coduals.
         /// </summary>
         public static Codual operator +(Codual lhs, double rhs) =>
-            new Codual(lhs.Magnitude + rhs, dx => lhs.Derivative(dx));
+            new Codual(lhs.Magnitude + rhs, lhs.Derivative);
 
         /// <summary>
         /// Add two Coduals.
