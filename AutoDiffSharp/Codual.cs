@@ -145,12 +145,6 @@ namespace AutoDiffSharp
             new Codual(lhs.Magnitude + rhs, lhs.Derivative);
 
         /// <summary>
-        /// Add two Coduals.
-        /// </summary>
-        public static Codual operator +(double lhs, Codual rhs) =>
-            rhs + lhs;
-
-        /// <summary>
         /// Subtract two Coduals.
         /// </summary>
         public static Codual operator -(Codual lhs, Codual rhs) =>
@@ -169,11 +163,11 @@ namespace AutoDiffSharp
         public static Codual operator -(Codual lhs, double rhs) =>
             lhs + -rhs;
 
-        /// <summary>
-        /// Subtract two Coduals.
-        /// </summary>
-        public static Codual operator -(double lhs, Codual rhs) =>
-            new Codual(lhs - rhs.Magnitude, dx => rhs.Derivative(-dx));
+        ///// <summary>
+        ///// Subtract two Coduals.
+        ///// </summary>
+        //public static Codual operator -(double lhs, Codual rhs) =>
+        //    new Codual(lhs - rhs.Magnitude, dx => rhs.Derivative(-dx));
 
         /// <summary>
         /// Multiply two Coduals.
@@ -218,12 +212,6 @@ namespace AutoDiffSharp
         /// <summary>
         /// Multiply two Coduals.
         /// </summary>
-        public static Codual operator *(double lhs, Codual rhs) =>
-            rhs * lhs;
-
-        /// <summary>
-        /// Multiply two Coduals.
-        /// </summary>
         public static Codual operator *(Codual lhs, int rhs) =>
             new Codual(lhs.Magnitude * rhs, dx => lhs.Derivative(dx * rhs));
 
@@ -238,11 +226,5 @@ namespace AutoDiffSharp
         /// </summary>
         public static Codual operator /(Codual lhs, int rhs) =>
             new Codual(lhs.Magnitude / rhs, dx => lhs.Derivative(dx / rhs));
-
-        /// <summary>
-        /// Multiply two Coduals.
-        /// </summary>
-        public static Codual operator *(int lhs, Codual rhs) =>
-            rhs * lhs;
     }
 }
