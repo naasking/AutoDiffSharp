@@ -15,6 +15,9 @@ namespace AutoDiffSharp
         /// </summary>
         public readonly double Magnitude;
 
+        /// <summary>
+        /// The multiplicative constant.
+        /// </summary>
         internal readonly double Multiplier;
 
         /// <summary>
