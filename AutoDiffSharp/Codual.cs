@@ -15,14 +15,17 @@ namespace AutoDiffSharp
         /// </summary>
         public readonly double Magnitude;
 
+        internal readonly double Multiplier;
+
         /// <summary>
         /// The derivatives continuation.
         /// </summary>
         internal readonly Action<double> Derivative;
 
-        internal Codual(double x, Action<double> dx)
+        internal Codual(double x, double m, Action<double> dx)
         {
             this.Magnitude = x;
+            this.Multiplier = m;
             this.Derivative = dx;
         }
 
@@ -33,7 +36,8 @@ namespace AutoDiffSharp
         public Codual Sin()
         {
             var lhs = this;
-            return new Codual(Math.Sin(Magnitude), dx => lhs.Derivative(dx * Math.Cos(lhs.Magnitude)));
+            return new Codual(Math.Sin(Magnitude), 1,
+                              dx => lhs.Derivative(dx * lhs.Multiplier * Math.Cos(lhs.Magnitude)));
         }
 
         /// <summary>
@@ -42,7 +46,8 @@ namespace AutoDiffSharp
         public Codual SinDeg()
         {
             var lhs = this;
-            return new Codual(Math.Sin(Magnitude * Math.PI / 180), dx => lhs.Derivative(dx * Math.Cos(lhs.Magnitude * Math.PI / 180)));
+            return new Codual(Math.Sin(Magnitude * Math.PI / 180), 1,
+                              dx => lhs.Derivative(dx * lhs.Multiplier * Math.Cos(lhs.Magnitude * Math.PI / 180)));
         }
 
         /// <summary>
@@ -51,7 +56,8 @@ namespace AutoDiffSharp
         public Codual Cos()
         {
             var lhs = this;
-            return new Codual(Math.Cos(Magnitude), dx => lhs.Derivative(dx * -Math.Sin(lhs.Magnitude)));
+            return new Codual(Math.Cos(Magnitude), 1,
+                              dx => lhs.Derivative(dx * lhs.Multiplier * -Math.Sin(lhs.Magnitude)));
         }
 
         /// <summary>
@@ -60,7 +66,8 @@ namespace AutoDiffSharp
         public Codual CosDeg()
         {
             var lhs = this;
-            return new Codual(Math.Cos(Magnitude * Math.PI / 180), dx => lhs.Derivative(dx * -Math.Sin(lhs.Magnitude * Math.PI / 180)));
+            return new Codual(Math.Cos(Magnitude * Math.PI / 180), 1,
+                              dx => lhs.Derivative(dx * lhs.Multiplier * -Math.Sin(lhs.Magnitude * Math.PI / 180)));
         }
 
         /// <summary>
@@ -69,7 +76,8 @@ namespace AutoDiffSharp
         public Codual Log()
         {
             var lhs = this;
-            return new Codual(Math.Log(Magnitude), dx => lhs.Derivative(dx * (1 / lhs.Magnitude)));
+            return new Codual(Math.Log(Magnitude), 1,
+                              dx => lhs.Derivative(dx * lhs.Multiplier * (1 / lhs.Magnitude)));
         }
 
         /// <summary>
@@ -79,7 +87,8 @@ namespace AutoDiffSharp
         public Codual Pow(int k)
         {
             var lhs = this;
-            return new Codual(Math.Pow(Magnitude, k), dx => lhs.Derivative(k * Math.Pow(lhs.Magnitude, k - 1) * dx));
+            return new Codual(Math.Pow(Magnitude, k), 1,
+                              dx => lhs.Derivative(dx * lhs.Multiplier * k * Math.Pow(lhs.Magnitude, k - 1)));
         }
 
         /// <summary>
@@ -88,7 +97,8 @@ namespace AutoDiffSharp
         public Codual Abs()
         {
             var lhs = this;
-            return new Codual(Math.Abs(Magnitude), dx => lhs.Derivative(dx * (lhs.Magnitude < 0 ? -1 : 1)));
+            return new Codual(Math.Abs(Magnitude), 1,
+                              dx => lhs.Derivative(dx * lhs.Multiplier * (lhs.Magnitude < 0 ? -1 : 1)));
         }
 
         /// <summary>
@@ -97,7 +107,8 @@ namespace AutoDiffSharp
         public Codual Exp()
         {
             var lhs = this;
-            return new Codual(Math.Exp(Magnitude), dx => lhs.Derivative(Math.Exp(lhs.Magnitude) * dx));
+            return new Codual(Math.Exp(Magnitude), 1,
+                              dx => lhs.Derivative(dx * lhs.Multiplier * Math.Exp(lhs.Magnitude)));
         }
 
         /// <summary>
@@ -121,7 +132,7 @@ namespace AutoDiffSharp
         /// Negate the Reverse.
         /// </summary>
         public static Codual operator -(Codual x) =>
-            new Codual(-x.Magnitude, dx => x.Derivative(-dx));
+            new Codual(-x.Magnitude, -x.Multiplier, x.Derivative);
 
         /// <summary>
         /// Add two Coduals.
@@ -129,32 +140,31 @@ namespace AutoDiffSharp
         public static Codual operator +(Codual lhs, Codual rhs) =>
             // if lhs == rhs, then propagate value only once to avoid exponential
             // blowup, ie. loop(N) { x = x + x } updates dx 2^N times in the naive case.
-            new Codual(lhs.Magnitude + rhs.Magnitude,
-                lhs.Derivative == rhs.Derivative
-                ? new Action<double>(dx => lhs.Derivative(2 * dx))
-                : dx =>
-                {
-                    lhs.Derivative(dx);
-                    rhs.Derivative(dx);
-                });
+            lhs.Derivative == rhs.Derivative
+            ? new Codual(lhs.Magnitude + rhs.Magnitude, lhs.Multiplier + rhs.Multiplier, lhs.Derivative)
+            : new Codual(lhs.Magnitude + rhs.Magnitude, 1, dx =>
+            {
+                lhs.Derivative(dx * lhs.Multiplier);
+                rhs.Derivative(dx * rhs.Multiplier);
+            });
 
         /// <summary>
         /// Add two Coduals.
         /// </summary>
         public static Codual operator +(Codual lhs, double rhs) =>
-            new Codual(lhs.Magnitude + rhs, lhs.Derivative);
+            new Codual(lhs.Magnitude + rhs, lhs.Multiplier, lhs.Derivative);
 
         /// <summary>
         /// Subtract two Coduals.
         /// </summary>
         public static Codual operator -(Codual lhs, Codual rhs) =>
             // if lhs == rhs, then contribution to derivative is zero
-            new Codual(lhs.Magnitude - rhs.Magnitude, lhs.Derivative == rhs.Derivative
-            ? new Action<double>(dx => { })
-            : dx =>
+            lhs.Derivative == rhs.Derivative
+            ? new Codual(lhs.Magnitude - rhs.Magnitude, 0, /*dx => { }) //*/ lhs.Derivative)
+            : new Codual(lhs.Magnitude - rhs.Magnitude, 1, dx =>
             {
-                lhs.Derivative(dx);
-                rhs.Derivative(-dx);
+                lhs.Derivative(dx * lhs.Multiplier);
+                rhs.Derivative(-dx * rhs.Multiplier);
             });
 
         /// <summary>
@@ -175,12 +185,12 @@ namespace AutoDiffSharp
         public static Codual operator *(Codual lhs, Codual rhs) =>
             // if lhs == rhs, then propagate value only once to avoid exponential
             // blowup, ie. loop(N) { x = x * x } updates dx 2^N times in the naive case.
-            new Codual(lhs.Magnitude * rhs.Magnitude, lhs.Derivative == rhs.Derivative
-            ? new Action<double>(dx => lhs.Derivative(2 * dx * lhs.Magnitude))
-            : dx =>
+            lhs.Derivative == rhs.Derivative
+            ? new Codual(lhs.Magnitude * rhs.Magnitude, lhs.Multiplier * rhs.Multiplier, lhs.Derivative)
+            : new Codual(lhs.Magnitude * rhs.Magnitude, 1, dx =>
             {
-                lhs.Derivative(dx * rhs.Magnitude);
-                rhs.Derivative(dx * lhs.Magnitude);
+                lhs.Derivative(dx * rhs.Multiplier * rhs.Magnitude);
+                rhs.Derivative(dx * lhs.Multiplier * lhs.Magnitude);
             });
 
         /// <summary>
@@ -188,13 +198,13 @@ namespace AutoDiffSharp
         /// </summary>
         public static Codual operator /(Codual lhs, Codual rhs) =>
             // if lhs == rhs, then contribution to derivative is zero
-            new Codual(lhs.Magnitude / rhs.Magnitude, lhs.Derivative == rhs.Derivative
-            ? new Action<double>(dx => { })
-            : dx =>
+            lhs.Derivative == rhs.Derivative
+            ? new Codual(lhs.Magnitude / rhs.Magnitude, lhs.Multiplier / rhs.Multiplier, lhs.Derivative)
+            : new Codual(lhs.Magnitude / rhs.Magnitude, 1, dx =>
             {
                 var d = rhs.Magnitude * rhs.Magnitude;
-                lhs.Derivative(dx * rhs.Magnitude / d);
-                rhs.Derivative(-dx * lhs.Magnitude / d);
+                lhs.Derivative(dx * lhs.Multiplier * rhs.Magnitude / d);
+                rhs.Derivative(-dx * rhs.Multiplier * lhs.Magnitude / d);
             });
 
         /// <summary>
@@ -207,24 +217,24 @@ namespace AutoDiffSharp
         /// Multiply two Coduals.
         /// </summary>
         public static Codual operator *(Codual lhs, double rhs) =>
-            new Codual(lhs.Magnitude * rhs, dx => lhs.Derivative(dx * rhs));
+            new Codual(lhs.Magnitude * rhs, lhs.Multiplier * rhs, lhs.Derivative);
 
         /// <summary>
         /// Multiply two Coduals.
         /// </summary>
         public static Codual operator *(Codual lhs, int rhs) =>
-            new Codual(lhs.Magnitude * rhs, dx => lhs.Derivative(dx * rhs));
+            new Codual(lhs.Magnitude * rhs, lhs.Multiplier * rhs, lhs.Derivative);
 
         /// <summary>
         /// Divide two Coduals.
         /// </summary>
         public static Codual operator /(Codual lhs, double rhs) =>
-            new Codual(lhs.Magnitude / rhs, dx => lhs.Derivative(dx / rhs));
+            new Codual(lhs.Magnitude / rhs, lhs.Multiplier / rhs, lhs.Derivative);
 
         /// <summary>
         /// Divide two Coduals.
         /// </summary>
         public static Codual operator /(Codual lhs, int rhs) =>
-            new Codual(lhs.Magnitude / rhs, dx => lhs.Derivative(dx / rhs));
+            new Codual(lhs.Magnitude / rhs, lhs.Multiplier / rhs, lhs.Derivative);
     }
 }

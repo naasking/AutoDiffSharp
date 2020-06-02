@@ -84,7 +84,7 @@ namespace AutoDiffSharp
         public static Dual DerivativeAt(double x, Func<Codual, Codual> f)
         {
             var dx = 0.0;
-            var y = f(new Codual(x, dy => dx += dy));
+            var y = f(new Codual(x, 1, dy => dx += dy));
             y.Derivative(1);
             return new Dual(y.Magnitude, dx);
         }
@@ -99,8 +99,8 @@ namespace AutoDiffSharp
         public static Result DerivativeAt(double x0, double x1, Func<Codual, Codual, Codual> f)
         {
             double dx0 = 0, dx1 = 0;
-            var y = f(new Codual(x0, dy => dx0 += dy),
-                      new Codual(x1, dy => dx1 += dy));
+            var y = f(new Codual(x0, 1, dy => dx0 += dy),
+                      new Codual(x1, 1, dy => dx1 += dy));
             y.Derivative(1);
             return new Result(y.Magnitude, dx0, dx1);
         }
@@ -116,9 +116,9 @@ namespace AutoDiffSharp
         public static Result DerivativeAt(double x0, double x1, double x2, Func<Codual, Codual, Codual, Codual> f)
         {
             double dx0 = 0, dx1 = 0, dx2 = 0;
-            var y = f(new Codual(x0, dy => dx0 += dy),
-                      new Codual(x1, dy => dx1 += dy),
-                      new Codual(x2, dy => dx2 += dy));
+            var y = f(new Codual(x0, 1, dy => dx0 += dy),
+                      new Codual(x1, 1, dy => dx1 += dy),
+                      new Codual(x2, 1, dy => dx2 += dy));
             y.Derivative(1);
             return new Result(y.Magnitude, dx0, dx1, dx2);
         }
@@ -132,7 +132,7 @@ namespace AutoDiffSharp
         public static Result DerivativeAt(double[] x, Func<Codual[], Codual> f)
         {
             var dx = new double[x.Length];
-            var args = x.Select((z, i) => new Codual(z, dz => dx[i] += dz)).ToArray();
+            var args = x.Select((z, i) => new Codual(z, 1, dz => dx[i] += dz)).ToArray();
             var y = f(args);
             y.Derivative(1);
             return new Result(y.Magnitude, dx);
