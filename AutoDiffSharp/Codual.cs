@@ -211,7 +211,7 @@ namespace AutoDiffSharp
             });
 
         /// <summary>
-        /// Raise Reverse to an exponent.
+        /// Raise Codual to an exponent.
         /// </summary>
         public static Codual operator ^(Codual lhs, int rhs) =>
             lhs.Pow(rhs);
