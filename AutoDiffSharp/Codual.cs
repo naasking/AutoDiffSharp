@@ -192,8 +192,8 @@ namespace AutoDiffSharp
             ? new Codual(lhs.Magnitude * rhs.Magnitude, lhs.Multiplier * rhs.Multiplier, lhs.Derivative)
             : new Codual(lhs.Magnitude * rhs.Magnitude, 1, dx =>
             {
-                lhs.Derivative(dx * rhs.Multiplier * rhs.Magnitude);
-                rhs.Derivative(dx * lhs.Multiplier * lhs.Magnitude);
+                lhs.Derivative(dx * lhs.Multiplier * rhs.Magnitude);
+                rhs.Derivative(dx * rhs.Multiplier * lhs.Magnitude);
             });
 
         /// <summary>
