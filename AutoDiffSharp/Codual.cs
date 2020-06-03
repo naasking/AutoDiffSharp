@@ -24,11 +24,11 @@ namespace AutoDiffSharp
         internal readonly int Id;
 
         /// <summary>
-        /// The 
+        /// The node constructor.
         /// </summary>
         internal readonly CreateNode CreateNode;
 
-        internal const int IGNORE = 0;
+        const int IGNORE = 0;
         const double NONE = 0;
 
         internal Codual(double x, CreateNode dx, int id)
