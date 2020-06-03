@@ -13,4 +13,10 @@
     <Version>1.0.0</Version>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Codual - Copy %282%29.cs" />
+    <Compile Remove="Codual - Copy.cs" />
+    <Compile Remove="Multiply.cs" />
+  </ItemGroup>
+
 </Project>

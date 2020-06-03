@@ -50,7 +50,7 @@ namespace AutoDiffSharp.Tests
         }
 
         static Codual SimplePoly2(Codual x, Codual y) =>
-            3 * (x ^ 2) - 2 * (y ^ 3);
+            (x ^ 2) * 3 - (y ^ 3) * 2;
 
         [Fact]
         public static void TestPoly3()
@@ -95,7 +95,7 @@ namespace AutoDiffSharp.Tests
         }
 
         static Codual Func2(Codual x, Codual y) =>
-            (x ^ 3) + 2 * y;
+            (x ^ 3) + y * 2;
 
         [Theory]
         [InlineData(0, 0, 0, 0, 0)]
@@ -112,7 +112,7 @@ namespace AutoDiffSharp.Tests
         }
 
         static Codual Func3(Codual x, Codual y) =>
-            (x ^ 3) + 2 * y * x;
+            (x ^ 3) + y * x * 2;
 
         [Theory]
         [InlineData(0, 0, 0)]
@@ -155,5 +155,20 @@ namespace AutoDiffSharp.Tests
 
         static Codual Sample(Codual x1, Codual x2) =>
             x1 * x2 - x2.SinDeg();
+
+        [Fact()]
+        public static void TestScaling()
+        {
+            var y = Calculus.DerivativeAt(2, 1, Scaling);
+        }
+
+        static Codual Scaling(Codual x0, Codual x1)
+        {
+            for (int i = 0; i < 10; ++i)
+                x1 = x1 * 2 + x1 * x0;
+                //x1 = (x1 * 2 / x1);
+                //x1 = x1 * (x1 * 2 / 4 + 1);
+            return x1;
+        }
     }
 }
