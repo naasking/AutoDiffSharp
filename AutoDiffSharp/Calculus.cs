@@ -77,21 +77,72 @@ namespace AutoDiffSharp
         #region CoDual Numbers
         struct Node
         {
-            public Func<double, (double, double)> Gradient;
+            public Op Op;
             public int Id1;
+            public double Dx1;
             public int Id2;
-            public override string ToString() => $"grad{Gradient?.Method.Name}({Id1}, {Id2})";
+            public double Dx2;
+            public override string ToString() => $"grad<{Op}>({Id1}, {Id2})";
+
+            public void Gradient(double dx, double[] df)
+            {
+                switch (Op)
+                {
+                    case Op.Neg:
+                        df[Id1] -= dx;
+                        break;
+                    case Op.Add:
+                        df[Id1] += dx;
+                        df[Id2] += dx;
+                        break;
+                    case Op.Sub:
+                        df[Id1] += dx;
+                        df[Id2] -= dx;
+                        break;
+                    case Op.Mul:
+                        df[Id1] += dx * Dx2;
+                        df[Id2] += dx * Dx1;
+                        break;
+                    case Op.Div:
+                        df[Id1] += dx / Dx2;
+                        df[Id2] -= Dx1 * dx / Dx2 / Dx2;
+                        break;
+                    case Op.Pow:
+                        df[Id1] += dx * Id2 * Math.Pow(Dx1, Id2 - 1);
+                        break;
+                    case Op.Exp:
+                        df[Id1] += dx * Math.Exp(Dx1);
+                        break;
+                    case Op.Abs:
+                        df[Id1] += Math.Abs(dx);
+                        break;
+                    case Op.Log:
+                        df[Id1] += dx / Dx1;
+                        break;
+                    case Op.Sin:
+                        df[Id1] += dx * Math.Cos(Dx1);
+                        break;
+                    case Op.SinDeg:
+                        df[Id1] += dx * Math.Cos(Dx1 * Math.PI / 180);
+                        break;
+                    case Op.Cos:
+                        df[Id1] += dx * -Math.Sin(Dx1);
+                        break;
+                    case Op.CosDeg:
+                        df[Id1] += dx * -Math.Sin(Dx1 * Math.PI / 180);
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unrecognized op: " + Op);
+                }
+            }
         }
+
         static double[] Propagate(int count, List<Node> q)
         {
             var dx = new double[q.Count];
             dx[dx.Length - 1] = 1;
             for (int i = dx.Length - 1; i >= count; --i)
-            {
-                var (dx1, dx2) = q[i].Gradient(dx[i]);
-                dx[q[i].Id1] += dx1;
-                dx[q[i].Id2] += dx2;
-            }
+                q[i].Gradient(dx[i], dx);
             return dx.Take(count).ToArray();
         }
 
@@ -100,9 +151,9 @@ namespace AutoDiffSharp
             var q = new List<Node>();
             while (i-- > 0)
                 q.Add(new Node());
-            int df(int id1, int id2, Func<double, (double, double)> grad)
+            int df(int id1, double dx1, int id2, double dx2, Op op)
             {
-                q.Add(new Node { Id1 = id1, Id2 = id2, Gradient = grad });
+                q.Add(new Node { Id1 = id1, Dx1 = dx1, Id2 = id2, Dx2 = dx2, Op = op });
                 return q.Count - 1;
             }
             return (q, df);

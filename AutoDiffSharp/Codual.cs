@@ -6,7 +6,32 @@ using System.Text;
 
 namespace AutoDiffSharp
 {
-    internal delegate int CreateNode(int id1, int id2, Func<double, (double, double)> k);
+    /// <summary>
+    /// Record a node in the trace.
+    /// </summary>
+    /// <returns>The index of the new node.</returns>
+    internal delegate int CreateNode(int id1, double dx1, int id2, double dx2, Op op);
+
+    /// <summary>
+    /// Math operator.
+    /// </summary>
+    internal enum Op
+    {
+        Var = 0,
+        Neg,
+        Add,
+        Sub,
+        Mul,
+        Div,
+        Pow,
+        Exp,
+        Log,
+        Abs,
+        Sin,
+        SinDeg,
+        Cos,
+        CosDeg,
+    }
 
     /// <summary>
     /// The numeric type for reverse-mode automatic differentiation.
@@ -42,83 +67,59 @@ namespace AutoDiffSharp
         /// Compute the sin in radians.
         /// </summary>
         /// <returns></returns>
-        public Codual Sin()
-        {
-            var lhs = this;
-            return new Codual(Math.Sin(Magnitude), CreateNode,
-                              CreateNode(Id, IGNORE, dx => (dx * Math.Cos(lhs.Magnitude), NONE)));
-        }
+        public Codual Sin() =>
+            new Codual(Math.Sin(Magnitude), CreateNode,
+                       CreateNode(Id, Magnitude, IGNORE, NONE, Op.Sin));
 
         /// <summary>
         /// Compute the sin in degrees.
         /// </summary>
-        public Codual SinDeg()
-        {
-            var lhs = this;
-            return new Codual(Math.Sin(Magnitude * Math.PI / 180), CreateNode,
-                              CreateNode(Id, IGNORE, dx => (dx * Math.Cos(lhs.Magnitude * Math.PI / 180), NONE)));
-        }
+        public Codual SinDeg() =>
+            new Codual(Math.Sin(Magnitude * Math.PI / 180), CreateNode,
+                       CreateNode(Id, Magnitude, IGNORE, NONE, Op.SinDeg));
 
         /// <summary>
         /// Compute the cosine in radians.
         /// </summary>
-        public Codual Cos()
-        {
-            var lhs = this;
-            return new Codual(Math.Cos(Magnitude), CreateNode,
-                              CreateNode(Id, IGNORE, dx => (dx * -Math.Sin(lhs.Magnitude), NONE)));
-        }
+        public Codual Cos() =>
+            new Codual(Math.Cos(Magnitude), CreateNode,
+                       CreateNode(Id, Magnitude, IGNORE, NONE, Op.Cos));
 
         /// <summary>
         /// Compute the cosine in degrees.
         /// </summary>
-        public Codual CosDeg()
-        {
-            var lhs = this;
-            return new Codual(Math.Cos(Magnitude * Math.PI / 180), CreateNode,
-                              CreateNode(Id, IGNORE, dx => (dx * -Math.Sin(lhs.Magnitude * Math.PI / 180), NONE)));
-        }
+        public Codual CosDeg() =>
+            new Codual(Math.Cos(Magnitude * Math.PI / 180), CreateNode,
+                       CreateNode(Id, Magnitude, IGNORE, NONE, Op.CosDeg));
 
         /// <summary>
         /// Compute the logarithm.
         /// </summary>
-        public Codual Log()
-        {
-            var lhs = this;
-            return new Codual(Math.Log(Magnitude), CreateNode,
-                              CreateNode(Id, IGNORE, dx => (dx * -Math.Sin(lhs.Magnitude * Math.PI / 180), NONE)));
-        }
+        public Codual Log() =>
+            new Codual(Math.Log(Magnitude), CreateNode,
+                       CreateNode(Id, Magnitude, IGNORE, NONE, Op.Log));
 
         /// <summary>
         /// Compute an exponentiation.
         /// </summary>
         /// <param name="k">The exponent.</param>
-        public Codual Pow(int k)
-        {
-            var lhs = this;
-            return new Codual(Math.Pow(Magnitude, k), CreateNode,
-                              CreateNode(Id, IGNORE, dx => (dx * k * Math.Pow(lhs.Magnitude, k - 1), NONE)));
-        }
+        public Codual Pow(int k) =>
+            new Codual(Math.Pow(Magnitude, k), CreateNode,
+                       CreateNode(Id, Magnitude, k, NONE, Op.Pow));
 
         /// <summary>
         /// Compute the absolute value.
         /// </summary>
-        public Codual Abs()
-        {
-            var lhs = this;
-            return new Codual(Math.Abs(Magnitude), CreateNode,
-                              CreateNode(Id, IGNORE, dx => (Math.Abs(dx), NONE)));
-        }
+        public Codual Abs() =>
+            new Codual(Math.Abs(Magnitude), CreateNode,
+                       CreateNode(Id, NONE, IGNORE, NONE, Op.Abs));
 
         /// <summary>
         /// Compute the exponential.
         /// </summary>
-        public Codual Exp()
-        {
-            var lhs = this;
-            return new Codual(Math.Exp(Magnitude), CreateNode,
-                              CreateNode(Id, IGNORE, dx => (dx * Math.Exp(lhs.Magnitude), NONE)));
-        }
+        public Codual Exp() =>
+            new Codual(Math.Exp(Magnitude), CreateNode,
+                       CreateNode(Id, Magnitude, IGNORE, NONE, Op.Exp));
 
         /// <summary>
         /// <inheritdoc cref="IEquatable{T}.Equals(T)"/>
@@ -141,21 +142,21 @@ namespace AutoDiffSharp
         /// Negate the Reverse.
         /// </summary>
         public static Codual operator -(Codual x) =>
-            new Codual(-x.Magnitude, x.CreateNode, x.CreateNode(x.Id, IGNORE, dx => (-dx, NONE)));
+            new Codual(-x.Magnitude, x.CreateNode, x.CreateNode(x.Id, NONE, IGNORE, NONE, Op.Neg));
 
         /// <summary>
         /// Add two Coduals.
         /// </summary>
         public static Codual operator +(Codual lhs, Codual rhs) =>
             new Codual(lhs.Magnitude + rhs.Magnitude, lhs.CreateNode,
-                       lhs.CreateNode(lhs.Id, rhs.Id, dx => (dx, dx)));
+                       lhs.CreateNode(lhs.Id, NONE, rhs.Id, NONE, Op.Add));
 
         /// <summary>
         /// Add two Coduals.
         /// </summary>
         public static Codual operator +(Codual lhs, double rhs) =>
             new Codual(lhs.Magnitude + rhs, lhs.CreateNode,
-                       lhs.CreateNode(lhs.Id, IGNORE, dx => (dx, NONE)));
+                       lhs.CreateNode(lhs.Id, NONE, IGNORE, NONE, Op.Add));
 
         /// <summary>
         /// Subtract two Coduals.
@@ -180,14 +181,14 @@ namespace AutoDiffSharp
         /// </summary>
         public static Codual operator *(Codual lhs, Codual rhs) =>
             new Codual(lhs.Magnitude* rhs.Magnitude, lhs.CreateNode,
-                       lhs.CreateNode(lhs.Id, rhs.Id, dx => (dx * rhs.Magnitude, dx * lhs.Magnitude)));
+                       lhs.CreateNode(lhs.Id, lhs.Magnitude, rhs.Id, rhs.Magnitude, Op.Mul));
 
         /// <summary>
         /// Divide two Coduals.
         /// </summary>
         public static Codual operator /(Codual lhs, Codual rhs) =>
             new Codual(lhs.Magnitude / rhs.Magnitude, lhs.CreateNode,
-                       lhs.CreateNode(lhs.Id, rhs.Id, dx => (dx / rhs.Magnitude, -dx / lhs.Magnitude)));
+                       lhs.CreateNode(lhs.Id, lhs.Magnitude, rhs.Id, rhs.Magnitude, Op.Div));
 
         /// <summary>
         /// Raise Codual to an exponent.
@@ -200,27 +201,27 @@ namespace AutoDiffSharp
         /// </summary>
         public static Codual operator *(Codual lhs, double rhs) =>
             new Codual(lhs.Magnitude * rhs, lhs.CreateNode,
-                       lhs.CreateNode(lhs.Id, IGNORE, dx => (dx * rhs, NONE)));
+                       lhs.CreateNode(lhs.Id, NONE, IGNORE, rhs, Op.Mul));
 
         /// <summary>
         /// Multiply two Coduals.
         /// </summary>
         public static Codual operator *(Codual lhs, int rhs) =>
             new Codual(lhs.Magnitude * rhs, lhs.CreateNode,
-                       lhs.CreateNode(lhs.Id, IGNORE, dx => (dx * rhs, NONE)));
+                       lhs.CreateNode(lhs.Id, NONE, IGNORE, rhs, Op.Mul));
 
         /// <summary>
         /// Divide two Coduals.
         /// </summary>
         public static Codual operator /(Codual lhs, double rhs) =>
             new Codual(lhs.Magnitude / rhs, lhs.CreateNode,
-                       lhs.CreateNode(lhs.Id, IGNORE, dx => (dx / rhs, NONE)));
+                       lhs.CreateNode(lhs.Id, NONE, IGNORE, rhs, Op.Div));
 
         /// <summary>
         /// Divide two Coduals.
         /// </summary>
         public static Codual operator /(Codual lhs, int rhs) =>
             new Codual(lhs.Magnitude / rhs, lhs.CreateNode,
-                       lhs.CreateNode(lhs.Id, IGNORE, dx => (dx / rhs, NONE)));
+                       lhs.CreateNode(lhs.Id, NONE, IGNORE, rhs, Op.Div));
     }
 }
